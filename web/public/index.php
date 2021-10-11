@@ -1,7 +1,10 @@
 <?php
 
 require_once 'database/connect.php';
-require_once 'functions.php';
+//require_once 'dataBaseEditor.php';
+
+use Roman\Func\dataBaseEditor;
+require '/var/www/composer/vendor/autoload.php';
 
 global $dataBaseConnect;
 
@@ -10,12 +13,12 @@ $url = rtrim($_SERVER['REQUEST_URI'], '/');
 $urlArr = explode('/', $url);
 
 if ($urlArr[1] != 'users') {
-    echoResults('The request is incorrect', 400);
+    dataBaseEditor::echoResults('The request is incorrect', 400);
     return;
 }
 
 if (isset($urlArr[3])) {
-    echoResults('The request is incorrect', 404);
+    dataBaseEditor::echoResults('The request is incorrect', 404);
     return;
 }
 
@@ -35,7 +38,7 @@ if (!$id) {
         return;
     }
 
-    echoResults('The request is incorrect', 400);
+    dataBaseEditor::echoResults('The request is incorrect', 400);
     die();
 }
 
@@ -57,4 +60,4 @@ if ($method == 'DELETE') {
     return;
 }
 
-echoResults('The request is incorrect', 400);
+dataBaseEditor::echoResults('The request is incorrect', 400);

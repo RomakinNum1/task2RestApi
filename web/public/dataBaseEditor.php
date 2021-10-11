@@ -1,5 +1,9 @@
 <?php
 
+namespace Roman\Func;
+
+use PDO;
+
 class dataBaseEditor
 {
     static function getUsers($dataBaseConnect)
@@ -64,6 +68,12 @@ class dataBaseEditor
         $resultDB->execute();
 
         echoResults('', 204);
+    }
+
+    static function echoResults($res, $code)
+    {
+        http_response_code($code);
+        echo json_encode($res);
     }
 }
 
