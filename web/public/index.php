@@ -1,12 +1,13 @@
 <?php
 
-require_once 'database/connect.php';
+//require_once 'database/ConnectToDB.php';
 //require_once 'dataBaseEditor.php';
 
+use Roman\Func\ConnectToDB;
 use Roman\Func\dataBaseEditor;
 require '/var/www/composer/vendor/autoload.php';
 
-global $dataBaseConnect;
+$dataBaseConnect = ConnectToDB::connect();
 
 $method = $_SERVER['REQUEST_METHOD'];
 $url = rtrim($_SERVER['REQUEST_URI'], '/');
