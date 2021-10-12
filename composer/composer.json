@@ -11,5 +11,8 @@
         "psr-4": {
             "Roman\\Func\\": "/var/www/html/public/"
         }
+    },
+    "require": {
+        "symfony/routing": "^5.3"
     }
 }
