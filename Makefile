@@ -10,6 +10,6 @@ down:
 up:
 	docker-compose up -d
 migrate:
-	docker run --network host docker-nginx-php-mysql_migration -path=/migrations/ -database "mysql://root:root@tcp(task2.loc:8989)/test" up 1
+	docker run --network host docker-nginx-php-mysql_migration -path=/migrations/ -database "mysql://root:root@tcp(task2.loc:8989)/test" up
 
 

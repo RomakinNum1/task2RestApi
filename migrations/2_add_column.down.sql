@@ -1,2 +1,2 @@
 ALTER TABLE users
-DROP COLUMN middleName;
+DROP COLUMN email;
