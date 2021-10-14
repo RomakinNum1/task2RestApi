@@ -43,9 +43,9 @@ class dataBaseEditor
             $resultDB = $dataBaseConnect->prepare("insert into users values (null, :firstName, :lastName, :email, false)");
             $resultDB->execute(array(':firstName' => $data['firstName'], ':lastName' => $data['lastName'], ':email' => $data['email']));
 
-            $issuedAt   = new DateTimeImmutable();
+            $issuedAt = new DateTimeImmutable();
             $data1 = [
-                'exp'  => $issuedAt->modify('+1 minutes')->getTimestamp(),
+                'exp' => $issuedAt->modify('+1 minutes')->getTimestamp(),
                 'id' => $dataBaseConnect->lastInsertId()
             ];
 
@@ -97,7 +97,7 @@ class dataBaseEditor
         $resultDB->execute();
         $res = $resultDB->fetch(PDO::FETCH_ASSOC);
 
-        if($res) {
+        if ($res) {
             $resultDB = $dataBaseConnect->prepare("update users set status = true where id = $token");
             $resultDB->execute();
             return true;
@@ -114,7 +114,7 @@ class dataBaseEditor
         $mail->Host = 'ssl://smtp.mail.ru';  // Адрес SMTP сервера
         $mail->SMTPAuth = true;          // Enable SMTP authentication
         $mail->Username = 'kinash2001@list.ru';       // ваше имя пользователя (без домена и @)
-        $mail->Password = '89505690579hjvf';    // ваш пароль
+        $mail->Password = '';    // ваш пароль
         $mail->SMTPSecure = 'ssl';         // шифрование ssl
         $mail->Port = 465;               // порт подключения
 

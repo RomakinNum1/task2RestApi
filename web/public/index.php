@@ -2,7 +2,6 @@
 
 use Firebase\JWT\ExpiredException;
 use Firebase\JWT\JWT;
-use newrelic\DistributedTracePayload;
 use Roman\Func\ConnectToDB;
 use Roman\Func\dataBaseEditor;
 
@@ -18,10 +17,6 @@ use Symfony\Component\HttpFoundation\Request;
 $dataBaseConnect = ConnectToDB::connect();
 
 try {
-    /*$route1 = new Route('/users/{id}');
-    $route2 = new Route('/users');
-    $route3 = new Route('/confirm/{token}');*/
-
     $routes = new RouteCollection();
 
     $routes->add('users1', new Route('/users/{id}'));
@@ -30,6 +25,7 @@ try {
 
     $context = new RequestContext();
     $context->fromRequest(Request::createFromGlobals());
+
     $matcher = new UrlMatcher($routes, $context);
     $parameters = $matcher->match($_SERVER['REQUEST_URI']);
 
@@ -40,8 +36,7 @@ try {
                 dataBaseEditor::echoResults('Email confirmed', 200);
             } else dataBaseEditor::echoResults('Address not found', 404);
             return;
-        }
-        catch(ExpiredException $ex){
+        } catch (ExpiredException $ex) {
             dataBaseEditor::echoResults('Address not found', 404);
             return;
         }
@@ -61,7 +56,7 @@ try {
         }
 
         dataBaseEditor::echoResults('The request is incorrect', 400);
-        die();
+        return;
     }
 
     if ($context->getMethod() == 'GET') {
@@ -83,7 +78,6 @@ try {
     }
 
     dataBaseEditor::echoResults('The request is incorrect', 400);
-}
-catch(ResourceNotFoundException $ex){
+} catch (ResourceNotFoundException $ex) {
     dataBaseEditor::echoResults('The request is incorrect', 400);
 }
