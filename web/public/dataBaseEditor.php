@@ -45,7 +45,7 @@ class dataBaseEditor
 
             $issuedAt = new DateTimeImmutable();
             $data1 = [
-                'exp' => $issuedAt->modify('+1 minutes')->getTimestamp(),
+                'exp' => $issuedAt->modify('+3 minutes')->getTimestamp(),
                 'id' => $dataBaseConnect->lastInsertId()
             ];
 
@@ -113,12 +113,12 @@ class dataBaseEditor
         $mail->isSMTP();                   // Отправка через SMTP
         $mail->Host = 'ssl://smtp.mail.ru';  // Адрес SMTP сервера
         $mail->SMTPAuth = true;          // Enable SMTP authentication
-        $mail->Username = 'kinash2001@list.ru';       // ваше имя пользователя (без домена и @)
-        $mail->Password = '';    // ваш пароль
+        $mail->Username = $_ENV["MYEMAIL"];       // ваше имя пользователя (без домена и @)
+        $mail->Password = $_ENV["MYEMAIL_PASSWORD"];    // ваш пароль
         $mail->SMTPSecure = 'ssl';         // шифрование ssl
         $mail->Port = 465;               // порт подключения
 
-        $mail->setFrom('kinash2001@list.ru');// от кого
+        $mail->setFrom($_ENV["MYEMAIL"]);// от кого
         $mail->addAddress($data['email']); // кому
 
         $mail->Subject = 'Подтверждение email';

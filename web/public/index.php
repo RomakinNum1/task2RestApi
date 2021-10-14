@@ -32,7 +32,8 @@ try {
     if ($parameters['_route'] == 'confirm') {
         try {
             $decoded = JWT::decode($parameters['token'], '34dddghre2rtjkyd', array('HS256'));
-            if (dataBaseEditor::confirmEmail($dataBaseConnect, $decoded['id'])) {
+
+            if (dataBaseEditor::confirmEmail($dataBaseConnect, $decoded->id)) {
                 dataBaseEditor::echoResults('Email confirmed', 200);
             } else dataBaseEditor::echoResults('Address not found', 404);
             return;
