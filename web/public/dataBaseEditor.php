@@ -2,10 +2,14 @@
 
 namespace Roman\Func;
 
+use Firebase\JWT\JWT;
 use PDO;
+use PHPMailer\PHPMailer\PHPMailer;
 
 class dataBaseEditor
 {
+    static $key = '34dddghre2rtjkyd';
+
     static function getUsers($dataBaseConnect)
     {
         $userList = [];
@@ -35,8 +39,12 @@ class dataBaseEditor
     static function addUser($dataBaseConnect, $data)
     {
         if ($data['firstName'] != '' && $data['lastName'] != '' && $data['email'] != '') {
-            $resultDB = $dataBaseConnect->prepare("insert into users values (null, :firstName, :lastName, :email, null)");
+            $resultDB = $dataBaseConnect->prepare("insert into users values (null, :firstName, :lastName, :email, false)");
             $resultDB->execute(array(':firstName' => $data['firstName'], ':lastName' => $data['lastName'], ':email' => $data['email']));
+
+            $jwt = JWT::encode($dataBaseConnect->lastInsertId(), self::$key);
+
+            self::sendMessage($jwt, $data);
 
             $res = $dataBaseConnect->lastInsertId();
 
@@ -76,6 +84,48 @@ class dataBaseEditor
         echo json_encode($res);
     }
 
+    static function confirmEmail($dataBaseConnect, $token)
+    {
+        $resultDB = $dataBaseConnect->prepare("select * from users where id = $token AND status = 0");
+        $resultDB->execute();
+        $res = $resultDB->fetch(PDO::FETCH_ASSOC);
+        if($res) {
+            $resultDB = $dataBaseConnect->prepare("update users set status = true where id = $token");
+            $resultDB->execute();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    static function sendMessage($token, $data)
+    {
+        $mail = new PHPMailer();
+        $mail->CharSet = 'UTF-8';
+        $mail->isSMTP();                   // Отправка через SMTP
+        $mail->Host = 'ssl://smtp.mail.ru';  // Адрес SMTP сервера
+        $mail->SMTPAuth = true;          // Enable SMTP authentication
+        $mail->Username = 'kinash2001@list.ru';       // ваше имя пользователя (без домена и @)
+        $mail->Password = '89505690579hjvf';    // ваш пароль
+        $mail->SMTPSecure = 'ssl';         // шифрование ssl
+        $mail->Port = 465;               // порт подключения
+
+        $mail->setFrom('kinash2001@list.ru');    // от кого
+        $mail->addAddress('kinash2001@list.ru', $data['firstName'] . ' ' . $data['lastName']); // кому
+
+        $mail->Subject = 'Подтверждение email';
+        $mail->msgHTML("<html><body>
+                <h1>Здравствуйте!</h1>
+                <p>Подтвердите свою почту по ссылке: <a href='http://task2.loc/confirm/$token'>ссылка</a></p>
+                </html></body>");
+// Отправляем
+        /*if ($mail->send()) {
+            echo 'Письмо отправлено!';
+        } else {
+            echo 'Ошибка: ' . $mail->ErrorInfo;
+        }*/
+    }
+
     /*private static function getColumnNames($dataBaseConnect)
     {
         $sth = $dataBaseConnect->prepare("SELECT `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_SCHEMA`='test' AND `TABLE_NAME`='users'");
@@ -87,4 +137,3 @@ class dataBaseEditor
         return $output;
     }*/
 }
-
