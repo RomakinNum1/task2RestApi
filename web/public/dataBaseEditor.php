@@ -2,6 +2,7 @@
 
 namespace Roman\Func;
 
+use DateTimeImmutable;
 use Firebase\JWT\JWT;
 use PDO;
 use PHPMailer\PHPMailer\PHPMailer;
@@ -38,11 +39,17 @@ class dataBaseEditor
 
     static function addUser($dataBaseConnect, $data)
     {
-        if ($data['firstName'] != '' && $data['lastName'] != '' && $data['email'] != '') {
+        if ($data['firstName'] != '' && $data['lastName'] != '' && $data['email'] != '' && filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
             $resultDB = $dataBaseConnect->prepare("insert into users values (null, :firstName, :lastName, :email, false)");
             $resultDB->execute(array(':firstName' => $data['firstName'], ':lastName' => $data['lastName'], ':email' => $data['email']));
 
-            $jwt = JWT::encode($dataBaseConnect->lastInsertId(), self::$key);
+            $issuedAt   = new DateTimeImmutable();
+            $data1 = [
+                'exp'  => $issuedAt->modify('+1 minutes')->getTimestamp(),
+                'id' => $dataBaseConnect->lastInsertId()
+            ];
+
+            $jwt = JWT::encode($data1, self::$key);
 
             self::sendMessage($jwt, $data);
 
@@ -50,7 +57,7 @@ class dataBaseEditor
 
             self::echoResults($res, 201);
         } else {
-            self::echoResults('The username or password is incorrect', 400);
+            self::echoResults('The username or password or email is incorrect', 400);
         }
     }
 
@@ -89,6 +96,7 @@ class dataBaseEditor
         $resultDB = $dataBaseConnect->prepare("select * from users where id = $token AND status = 0");
         $resultDB->execute();
         $res = $resultDB->fetch(PDO::FETCH_ASSOC);
+
         if($res) {
             $resultDB = $dataBaseConnect->prepare("update users set status = true where id = $token");
             $resultDB->execute();
@@ -110,15 +118,16 @@ class dataBaseEditor
         $mail->SMTPSecure = 'ssl';         // шифрование ssl
         $mail->Port = 465;               // порт подключения
 
-        $mail->setFrom('kinash2001@list.ru');    // от кого
-        $mail->addAddress('kinash2001@list.ru', $data['firstName'] . ' ' . $data['lastName']); // кому
+        $mail->setFrom('kinash2001@list.ru');// от кого
+        $mail->addAddress($data['email']); // кому
 
         $mail->Subject = 'Подтверждение email';
         $mail->msgHTML("<html><body>
                 <h1>Здравствуйте!</h1>
                 <p>Подтвердите свою почту по ссылке: <a href='http://task2.loc/confirm/$token'>ссылка</a></p>
                 </html></body>");
-// Отправляем
+        $mail->send();
+        // Отправляем
         /*if ($mail->send()) {
             echo 'Письмо отправлено!';
         } else {
