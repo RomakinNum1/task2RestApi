@@ -85,6 +85,12 @@ class dataBaseEditor
         self::echoResults('', 204);
     }
 
+    static function deleteUsers($dataBaseConnect)
+    {
+        $resultDB = $dataBaseConnect->prepare("delete from users where status = 0");
+        $resultDB->execute();
+    }
+
     static function echoResults($res, $code)
     {
         http_response_code($code);

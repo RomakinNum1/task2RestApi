@@ -38,6 +38,7 @@ try {
             } else dataBaseEditor::echoResults('Address not found', 404);
             return;
         } catch (ExpiredException $ex) {
+            dataBaseEditor::deleteUsers($dataBaseConnect);
             dataBaseEditor::echoResults('Address not found', 404);
             return;
         }
