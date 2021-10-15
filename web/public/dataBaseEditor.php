@@ -8,8 +8,6 @@ use PHPMailer\PHPMailer\PHPMailer;
 
 class dataBaseEditor
 {
-    static $key = '34dddghre2rtjkyd';
-
     static function getUsers($dataBaseConnect)
     {
         $userList = [];
@@ -47,7 +45,7 @@ class dataBaseEditor
                 'id' => $dataBaseConnect->lastInsertId()
             ];
 
-            $jwt = JWT::encode($data1, self::$key);
+            $jwt = JWT::encode($data1, $_ENV['JWT_KEY']);
 
             self::sendMessage($jwt, $data);
 
@@ -114,16 +112,16 @@ class dataBaseEditor
     {
         $mail = new PHPMailer();
         $mail->CharSet = 'UTF-8';
-        $mail->isSMTP();                   // Отправка через SMTP
-        $mail->Host = 'ssl://smtp.mail.ru';  // Адрес SMTP сервера
-        $mail->SMTPAuth = true;          // Enable SMTP authentication
-        $mail->Username = $_ENV['MYEMAIL'];       // ваше имя пользователя (без домена и @)
+        $mail->isSMTP();                                // Отправка через SMTP
+        $mail->Host = $_ENV['MYEMAIL_HOST'];            // Адрес SMTP сервера
+        $mail->SMTPAuth = true;                         // Enable SMTP authentication
+        $mail->Username = $_ENV['MYEMAIL'];             // ваше имя пользователя (без домена и @)
         $mail->Password = $_ENV['MYEMAIL_PASSWORD'];    // ваш пароль
-        $mail->SMTPSecure = 'ssl';         // шифрование ssl
-        $mail->Port = 465;               // порт подключения
+        $mail->SMTPSecure = 'ssl';                      // шифрование ssl
+        $mail->Port = 465;                              // порт подключения
 
-        $mail->setFrom($_ENV['MYEMAIL']);// от кого
-        $mail->addAddress($data['email']); // кому
+        $mail->setFrom($_ENV['MYEMAIL']);               // от кого
+        $mail->addAddress($data['email']);              // кому
 
         $mail->Subject = 'Подтверждение email';
         $mail->msgHTML("<html><body>

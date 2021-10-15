@@ -29,7 +29,7 @@ try {
     $parameters = $matcher->match($_SERVER['REQUEST_URI']);
 
     if ($parameters['_route'] == 'confirmUser') {
-        $decoded = JWT::decode($parameters['token'], dataBaseEditor::$key, array('HS256'));
+        $decoded = JWT::decode($parameters['token'], $_ENV['JWT_KEY'], array('HS256'));
 
         if (dataBaseEditor::confirmEmail($dataBaseConnect, $decoded->id)) {
             dataBaseEditor::echoResults('Email confirmed', 200);
