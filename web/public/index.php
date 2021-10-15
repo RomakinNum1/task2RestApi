@@ -1,6 +1,5 @@
 <?php
 
-use Firebase\JWT\ExpiredException;
 use Firebase\JWT\JWT;
 use Roman\Func\ConnectToDB;
 use Roman\Func\dataBaseEditor;
@@ -19,9 +18,9 @@ $dataBaseConnect = ConnectToDB::connect();
 try {
     $routes = new RouteCollection();
 
-    $routes->add('users1', new Route('/users/{id}'));
-    $routes->add('users2', new Route('/users'));
-    $routes->add('confirm', new Route('/confirm/{token}'));
+    $routes->add('getUserId', new Route('/users/{id}'));
+    $routes->add('getUsers', new Route('/users'));
+    $routes->add('confirmUser', new Route('/confirm/{token}'));
 
     $context = new RequestContext();
     $context->fromRequest(Request::createFromGlobals());
@@ -29,19 +28,22 @@ try {
     $matcher = new UrlMatcher($routes, $context);
     $parameters = $matcher->match($_SERVER['REQUEST_URI']);
 
-    if ($parameters['_route'] == 'confirm') {
-        try {
-            $decoded = JWT::decode($parameters['token'], '34dddghre2rtjkyd', array('HS256'));
+    if ($parameters['_route'] == 'confirmUser') {
+        $decoded = JWT::decode($parameters['token'], dataBaseEditor::$key, array('HS256'));
 
-            if (dataBaseEditor::confirmEmail($dataBaseConnect, $decoded->id)) {
-                dataBaseEditor::echoResults('Email confirmed', 200);
-            } else dataBaseEditor::echoResults('Address not found', 404);
+        if (dataBaseEditor::confirmEmail($dataBaseConnect, $decoded->id)) {
+            dataBaseEditor::echoResults('Email confirmed', 200);
             return;
-        } catch (ExpiredException $ex) {
-            dataBaseEditor::deleteUsers($dataBaseConnect);
-            dataBaseEditor::echoResults('Address not found', 404);
-            return;
+        } else {
+            if ($decoded->time < time()) {
+                dataBaseEditor::deleteInactiveUsers($dataBaseConnect, $decoded->id);
+                dataBaseEditor::echoResults('The address is invalid', 404);
+                return;
+            } else {
+                dataBaseEditor::echoResults('Address not found', 404);
+            }
         }
+        return;
     }
     if (!isset($parameters['id'])) {
         if ($context->getMethod() == 'GET') {

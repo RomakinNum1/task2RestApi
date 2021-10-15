@@ -2,7 +2,6 @@
 
 namespace Roman\Func;
 
-use DateTimeImmutable;
 use Firebase\JWT\JWT;
 use PDO;
 use PHPMailer\PHPMailer\PHPMailer;
@@ -26,8 +25,8 @@ class dataBaseEditor
 
     static function getUser($dataBaseConnect, $id)
     {
-        $resultDB = $dataBaseConnect->prepare("select * from users where id = $id");
-        $resultDB->execute();
+        $resultDB = $dataBaseConnect->prepare("select * from users where id = :id");
+        $resultDB->execute(['id' => $id]);
         $res = $resultDB->fetch(PDO::FETCH_ASSOC);
 
         if (!$res) {
@@ -43,9 +42,8 @@ class dataBaseEditor
             $resultDB = $dataBaseConnect->prepare("insert into users values (null, :firstName, :lastName, :email, false)");
             $resultDB->execute(array(':firstName' => $data['firstName'], ':lastName' => $data['lastName'], ':email' => $data['email']));
 
-            $issuedAt = new DateTimeImmutable();
             $data1 = [
-                'exp' => $issuedAt->modify('+3 minutes')->getTimestamp(),
+                'time' => time() + 30,
                 'id' => $dataBaseConnect->lastInsertId()
             ];
 
@@ -63,8 +61,8 @@ class dataBaseEditor
 
     static function updateUser($dataBaseConnect, $id, $data)
     {
-        $resultDB = $dataBaseConnect->prepare("select * from users where id = $id");
-        $resultDB->execute();
+        $resultDB = $dataBaseConnect->prepare("select * from users where id = :id");
+        $resultDB->execute(['id' => $id]);
         $res = $resultDB->fetch(PDO::FETCH_ASSOC);
 
         if ($data['firstName'] != '' && $data['lastName'] != '' && $res && $data['email'] != '') {
@@ -79,16 +77,16 @@ class dataBaseEditor
 
     static function deleteUser($dataBaseConnect, $id)
     {
-        $resultDB = $dataBaseConnect->prepare("delete from users where id = $id");
-        $resultDB->execute();
+        $resultDB = $dataBaseConnect->prepare("delete from users where id = :id");
+        $resultDB->execute(['id' => $id]);
 
         self::echoResults('', 204);
     }
 
-    static function deleteUsers($dataBaseConnect)
+    static function deleteInactiveUsers($dataBaseConnect, $id)
     {
-        $resultDB = $dataBaseConnect->prepare("delete from users where status = 0");
-        $resultDB->execute();
+        $resultDB = $dataBaseConnect->prepare("delete from users where id = :id AND status = 0");
+        $resultDB->execute(['id' => $id]);
     }
 
     static function echoResults($res, $code)
@@ -99,13 +97,13 @@ class dataBaseEditor
 
     static function confirmEmail($dataBaseConnect, $token)
     {
-        $resultDB = $dataBaseConnect->prepare("select * from users where id = $token AND status = 0");
-        $resultDB->execute();
+        $resultDB = $dataBaseConnect->prepare("select * from users where id = :id AND status = 0");
+        $resultDB->execute(['id' => $token]);
         $res = $resultDB->fetch(PDO::FETCH_ASSOC);
 
         if ($res) {
-            $resultDB = $dataBaseConnect->prepare("update users set status = true where id = $token");
-            $resultDB->execute();
+            $resultDB = $dataBaseConnect->prepare("update users set status = true where id = :id");
+            $resultDB->execute(['id' => $token]);
             return true;
         } else {
             return false;
